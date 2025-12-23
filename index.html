@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>症例サイト入口</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <!-- JS無効時のフォールバック（2秒後 patient.html へ）-->
+  <meta http-equiv="refresh" content="2; url=patient.html">
+  <noscript>
+    <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;padding:24px}</style>
+    <p>自動的に <code>patient.html</code> へ移動します。移動しない場合は
+      <a href="patient.html">こちら</a> をクリックしてください。</p>
+  </noscript>
+
+  <script>
+    // === 必要に応じて編集 ==========================
+    const PORTAL_INDEX = "https://da-i-go.github.io/STATlms-home/"; // 全体サイトの index.html
+    const DEST_PATIENT = "./patient.html"; // この症例リポ内の patient.html
+    // ==============================================
+
+    (function () {
+      const params = new URLSearchParams(location.search);
+      // テスト・直リンク用: ?force=1 をURLの末尾に追加してあるなら認証チェックをスキップして即 patient.html
+      if (params.get("force") === "1") {
+        location.replace(DEST_PATIENT);
+        return;
+      }
+
+      // ポータルでログイン済みか判定（同一オリジンなら sessionStorage は引き継がれる）
+      // ※ あなたの既存実装：index.html → problems.html で sessionStorage に保存しています
+      const authed = sessionStorage.getItem("authenticated") === "true";
+
+      if (authed) {
+        // 任意：uid/name をこの症例側でも使いたい場合、必要に応じて読み出せます
+        // const uid = sessionStorage.getItem("uid");
+        // const name = sessionStorage.getItem("name");
+        location.replace(DEST_PATIENT);
+      } else {
+        // 未ログインならポータル入口へ戻す（履歴を汚さないよう replace）
+        location.replace(PORTAL_INDEX);
+      }
+    })();
+  </script>
+</head>
+<body></body>
+</html>

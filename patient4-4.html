@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta name="robots" content="noindex, nofollow" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>患者情報</title>
+    <link rel="stylesheet" href="css/patient.css" />
+    <!--<script>
+      if (sessionStorage.getItem("authenticated") !== "true") {
+        location.replace("index.html");
+      }
+    </script>-->
+  </head>
+
+  <body>
+    <h1>患者情報</h1>
+
+    <div class="patient-card">
+      <div class="row">
+        <span class="label">患者</span>
+        <span class="value">80代、男性</span>
+      </div>
+
+      <div class="row">
+        <span class="label">症状</span>
+        <span class="value">腹痛、下血、発熱で受診<br>
+            来院時tapping painが腹部全体にあり<br>
+            痔の手術後<br>
+            Lac9.9</span>
+      </div>
+
+      <div class="row">
+        <span class="label">検査内容</span>
+        <span class="value">痔や憩室出血鑑別目的でダイナミックCT</span>
+      </div>
+      
+      <!-- 大きく問いみたいのを出したい時に使用 -->
+      <!-- 
+      <div class="highlight-question">
+        緊急で呼び出しをされた所見は？
+      </div>
+      -->
+    </div>
+
+    <div class="next-button">
+      <a href="viewer4-4.html">▶ 検査画像へ</a>　<!-- 次にとぶサイト-->
+    </div>
+  </body>
+</html>

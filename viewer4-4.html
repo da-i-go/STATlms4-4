@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta name="robots" content="noindex, nofollow" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>STAT画像学習システム</title>
+    <link href="css/viewer.css" rel="stylesheet" />
+    
+    <!--
+    <script>
+      // 未認証ならログインへ
+      if (sessionStorage.getItem("authenticated") !== "true") {
+        location.replace("index.html");
+      } 
+    </script>-->
+  </head>
+
+  <body>
+    <div id="loadingOverlay">
+      <div class="spinner"></div>
+      <div class="loading-text">Loading...</div>
+    </div>
+
+    <main style="display: none">
+      <h1 id="setTitle">検査画像</h1>
+
+      <div class="set-buttons" id="setButtonsContainer"></div>
+
+      <div class="viewer">
+        <img alt="CT Slice" id="ctImage" src="" />
+      </div>
+
+      <div class="slider-container">
+        <button class="arrow-button" onclick="changeSlice(-1)">←</button>
+        <input
+          id="sliceSlider"
+          min="1"
+          step="1"
+          type="range"
+          oninput="updateSlice(parseInt(this.value))"
+        />
+        <button class="arrow-button" onclick="changeSlice(1)">→</button>
+      </div>
+
+      <div class="slice-info" id="sliceInfo">現在のスライス: 1</div>
+
+      <div class="navigation">
+        <button onclick="location.href='answer4-4.html'">
+          <!-- 次にとぶサイト -->
+          <span class="icon">▶</span>
+          <span class="label">解答</span>
+        </button>
+      </div>
+    </main>
+
+    <script>
+      const imageSets = {
+        "CT-P": { label: "単純相", totalSlices: 99, padding: 5 },
+        "CT-A": { label: "動脈相", totalSlices: 99, padding: 5 },
+        "CT-CE": { label: "平衡相", totalSlices: 99, padding: 5 },
+        "Cor-A": { label: "cor画像 動脈相", totalSlices: 108, padding: 5 },
+        "Cor-CE": { label: "cor画像 平衡相", totalSlices: 108, padding: 5 },
+        "NextDay-CT": { label: "翌日CT  平衡相", totalSlices: 110, padding: 5 },
+      };
+
+      let currentSet = "CT-P"; // 一番最初に表示させる画像セット
+      let currentSlice = 1;
+      const imageCache = {};
+
+      const ctImage = document.getElementById("ctImage");
+      const slider = document.getElementById("sliceSlider");
+      const info = document.getElementById("sliceInfo");
+      const title = document.getElementById("setTitle");
+      const loadingOverlay = document.getElementById("loadingOverlay");
+      const mainContent = document.querySelector("main");
+      const setButtonsContainer = document.getElementById("setButtonsContainer");
+
+      function getImageFilename(n, set = currentSet) {
+        const padding = imageSets[set].padding || 0;
+        const padded = String(n).padStart(padding, "0");
+        return `${set}/${set}-${padded}.JPG`; // 拡張子（JPG/jpeg/png）は実ファイルと揃えること
+      }
+
+      function preloadImages(set, callback) {
+        if (imageCache[set]) {
+          callback();
+          return;
+        }
+
+        const { totalSlices } = imageSets[set];
+        imageCache[set] = [];
+        let loaded = 0;
+
+        for (let i = 1; i <= totalSlices; i++) {
+          const img = new Image();
+          img.onload = img.onerror = () => {
+            loaded++;
+            if (loaded === totalSlices) callback();
+          };
+          img.src = getImageFilename(i, set);
+          imageCache[set][i] = img;
+        }
+      }
+
+      function updateSlice(n) {
+        const total = imageSets[currentSet].totalSlices;
+        currentSlice = n;
+        const img = imageCache[currentSet]?.[n];
+        ctImage.src = img?.src || getImageFilename(n);
+        info.textContent = `現在のスライス: ${n} / ${total}`;
+        slider.value = n;
+      }
+
+      function changeSlice(step) {
+        const total = imageSets[currentSet].totalSlices;
+        const newSlice = Math.max(1, Math.min(total, currentSlice + step));
+        updateSlice(newSlice);
+      }
+
+      function switchImageSetTo(setName) {
+        loadingOverlay.style.display = "flex";
+        mainContent.style.display = "none";
+
+        currentSet = setName;
+        currentSlice = 1;
+
+        slider.max = imageSets[setName].totalSlices;
+        slider.value = currentSlice;
+
+        preloadImages(currentSet, () => {
+          loadingOverlay.style.display = "none";
+          mainContent.style.display = "flex";
+          updateSlice(currentSlice);
+          updateButtonStates();
+        });
+      }
+
+      function createSetButtons() {
+        for (const key in imageSets) {
+          const btn = document.createElement("button");
+          btn.textContent = imageSets[key].label;
+          btn.className = "set-button";
+          btn.dataset.setKey = key;
+          btn.addEventListener("click", () => switchImageSetTo(key));
+          setButtonsContainer.appendChild(btn);
+        }
+      }
+
+      function updateButtonStates() {
+        const buttons = setButtonsContainer.querySelectorAll(".set-button");
+        buttons.forEach((btn) => {
+          const key = btn.dataset.setKey;
+          if (key === currentSet) {
+            btn.disabled = true;
+            btn.innerHTML = `✔️ ${imageSets[key].label}`;
+          } else {
+            btn.disabled = false;
+            btn.innerHTML = imageSets[key].label;
+          }
+        });
+      }
+
+      window.onload = () => {
+        createSetButtons();
+        updateButtonStates();
+        switchImageSetTo(currentSet); // ← これでスライドのmaxを直す
+      };
+
+    </script>
+  </body>
+</html>
