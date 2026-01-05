@@ -13,7 +13,6 @@
         location.replace("index.html");
       }
     </script>
-
   </head>
 
   <body>
@@ -29,39 +28,58 @@
       <div class="carousel-container">
         <div class="carousel-wrapper">
           <button class="carousel-button prev">❮</button>
+
           <div class="carousel-track-container">
             <ul class="carousel-track">
-            
               <li class="carousel-slide">
-                <img src="key-images/key1.jpeg" alt="単純CT" />
-                <!-- "ファイル名/画像名" -->
-                <p class="caption">当日のCT。<br>
-                    上腸間膜動脈抹消が単純CTで淡く高信号。</p>
-                <!-- 画像の下につける説明 -->
+                <div class="zoomable">
+                  <img class="zoom-target" src="key-images/key1.jpeg" alt="単純CT" />
+                  <span class="zoom-icon" aria-hidden="true">🔍>むしめ>むし
+                </div>
+                <p class="caption">
+                  当日のCT。<br />
+                  上腸間膜動脈抹消が単純CTで淡く高信号。
+                </p>
               </li>
 
               <li class="carousel-slide">
-                <img src="key-images/key2.jpeg" alt="動脈相冠状断" />
-                <p class="caption">当日のCT<br>
-                    上腸間膜動脈抹消で造影不良が見られる。</p>
+                <div class="zoomable">
+                  <img class="zoom-target" src="key-images/key2.jpeg" alt="動脈相冠状断" />
+                  <span class="zoom-icon" aria-hidden="true">🔍</span>
+                </div>
+                <p class="caption">
+                  当日のCT<br />
+                  上腸間膜動脈抹消で造影不良が見られる。
+                </p>
               </li>
-              
+
               <li class="carousel-slide">
-                <img src="key-images/key3.jpeg" alt="翌日CT" />
-                <p class="caption">翌日のCT１<br>
-                    右側腹部〜骨盤内の小腸は壁が菲薄で造影効果が減弱している。</p>
+                <div class="zoomable">
+                  <img class="zoom-target" src="key-images/key3.jpeg" alt="翌日CT1" />
+                  <span class="zoom-icon" aria-hidden="true">🔍</span>
+                </div>
+                <p class="caption">
+                  翌日のCT１<br />
+                  右側腹部〜骨盤内の小腸は壁が菲薄で造影効果が減弱している。
+                </p>
               </li>
-              
+
               <li class="carousel-slide">
-                <img src="key-images/key4.jpeg" alt="翌日CT" />
-                <p class="caption">翌日のCT２<br>
-                    上腸間膜静脈径が上腸間脈動脈径よりも細いsmaller SMV signが見られる。</p>
+                <div class="zoomable">
+                  <img class="zoom-target" src="key-images/key4.jpeg" alt="翌日CT2" />
+                  <span class="zoom-icon" aria-hidden="true">🔍</span>
+                </div>
+                <p class="caption">
+                  翌日のCT２<br />
+                  上腸間膜静脈径が上腸間脈動脈径よりも細いsmaller SMV signが見られる。
+                </p>
               </li>
-              
             </ul>
           </div>
+
           <button class="carousel-button next">❯</button>
         </div>
+
         <div class="carousel-indicators"></div>
       </div>
     </section>
@@ -69,10 +87,14 @@
     <section class="result-section">
       <h2 style="color: crimson">■ 放射線科医より一言</h2>
       <div class="explanation">
-        <p>たとえ活動性出血検索目的であっても、動脈相を撮影した場合は大動脈および主要な分枝（特にSMA）の造営効果があるかどうかは確認しよう。</p>
+        <p>
+          たとえ活動性出血検索目的であっても、動脈相を撮影した場合は大動脈および主要な分枝（特にSMA）の造営効果があるかどうかは確認しよう。
+        </p>
         <p>腸管由来の症状の可能性がある場合（腹痛、下血）、腸管を一度は確認しよう。</p>
-        <p>限局性の腸管の異常（壁肥厚や造影不良）がある場合はそこに行く血管を確認しよう。<br>
-          （造影不良があれば絞扼性腸閉塞か、SMA血栓/塞栓/解離かNOMIに大別される）</p>
+        <p>
+          限局性の腸管の異常（壁肥厚や造影不良）がある場合はそこに行く血管を確認しよう。<br />
+          （造影不良があれば絞扼性腸閉塞か、SMA血栓/塞栓/解離かNOMIに大別される）
+        </p>
       </div>
     </section>
 
@@ -81,7 +103,17 @@
       <a href="https://da-i-go.github.io/STATlms-home/problems.html">問題一覧へ戻る</a>
     </div>
 
-    <!-- スライド操作スクリプト -->
+    <!-- 画像拡大モーダル -->
+    <div id="imageModal" class="image-modal" aria-hidden="true">
+      <div class="image-modal__backdrop"></div>
+
+      <div class="image-modal__content" role="dialog" aria-modal="true" aria-label="画像拡大表示">
+        <button type="button" class="image-modal__close" aria-label="閉じる">×</button>
+        <img id="imageModalImg" alt="" />
+      </div>
+    </div>
+
+    <!-- スライド操作スクリプト + 画像拡大 -->
     <script>
       const track = document.querySelector(".carousel-track");
       const slides = Array.from(track.children);
@@ -142,6 +174,46 @@
 
       window.addEventListener("load", updateSlidePosition);
       window.addEventListener("resize", updateSlidePosition);
+
+      // ===== 画像タップで拡大モーダル =====
+      const modal = document.getElementById("imageModal");
+      const modalImg = document.getElementById("imageModalImg");
+      const modalClose = modal.querySelector(".image-modal__close");
+      const modalBackdrop = modal.querySelector(".image-modal__backdrop");
+
+      function openModal(src, alt) {
+        modalImg.src = src;
+        modalImg.alt = alt || "";
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeModal() {
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+        modalImg.src = "";
+        document.body.style.overflow = "";
+      }
+
+      document.querySelectorAll(".zoom-target").forEach((img) => {
+        img.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const full = img.getAttribute("data-full");
+          openModal(full || img.src, img.alt);
+        });
+
+        // スワイプ干渉を減らす
+        img.addEventListener("touchstart", (e) => e.stopPropagation(), { passive: true });
+        img.addEventListener("touchend", (e) => e.stopPropagation(), { passive: true });
+      });
+
+      modalClose.addEventListener("click", closeModal);
+      modalBackdrop.addEventListener("click", closeModal);
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && modal.classList.contains("is-open")) closeModal();
+      });
     </script>
 
     <!-- スプレッドシート記録スクリプト -->
@@ -149,9 +221,9 @@
       (function () {
         if (sessionStorage.getItem("authenticated") !== "true") return;
         const API =
-          "https://script.google.com/macros/s/AKfycbx8b_17MyBUxJtJhJ21KFSfJguUBSGKHBg-WjLHHylbqho1pFjZKIMjvqlMWzUWNFcC/exec"; // GASのURL
+          "https://script.google.com/macros/s/AKfycbx8b_17MyBUxJtJhJ21KFSfJguUBSGKHBg-WjLHHylbqho1pFjZKIMjvqlMWzUWNFcC/exec";
         const uid = sessionStorage.getItem("uid") || "";
-        const problemId = "4-4"; // 問題番号に変える（変更を忘れないこと）
+        const problemId = "4-4";
         const page = location.pathname + location.search;
 
         fetch(API + "?route=done", {
